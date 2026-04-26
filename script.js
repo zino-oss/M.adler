@@ -27,16 +27,44 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Nav scroll effect
+    // Immersive Reading Variable & Logic
+    let inactivityTimer;
+
+    function resetInactivityTimer() {
+        if (navbar) {
+            navbar.classList.remove('navbar-hidden');
+            clearTimeout(inactivityTimer);
+            inactivityTimer = setTimeout(() => {
+                const isMenuOpen = navLinks && navLinks.classList.contains('mobile-active');
+                // Only hide if scrolled enough and menu is closed
+                if (window.scrollY > 150 && !isMenuOpen) {
+                    navbar.classList.add('navbar-hidden');
+                }
+            }, 3000);
+        }
+    }
+
+    // Nav scroll effect & integration
     const revealNavbar = document.querySelector('.navbar');
 
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > 50) {
-            navbar.classList.add('scrolled');
-        } else {
-            navbar.classList.remove('scrolled');
-        }
-    });
+    if (navbar) {
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+            resetInactivityTimer();
+        }, { passive: true });
+
+        window.addEventListener('mousemove', resetInactivityTimer, { passive: true });
+        window.addEventListener('touchstart', resetInactivityTimer, { passive: true });
+
+        navbar.addEventListener('mouseenter', () => clearTimeout(inactivityTimer));
+        navbar.addEventListener('mouseleave', resetInactivityTimer);
+
+        resetInactivityTimer();
+    }
 
     // Intersection Observer for scroll animations
     const revealElements = document.querySelectorAll('.reveal-up, .reveal-left, .reveal-right');
@@ -78,4 +106,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    // Auto-collapse logo text into icon after 3.5 seconds
+    const logo = document.querySelector('.custom-logo');
+    if (logo) {
+        setTimeout(() => {
+            logo.classList.add('logo-collapsed');
+        }, 3500);
+    }
 });
